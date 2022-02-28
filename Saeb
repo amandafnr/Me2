@@ -1,0 +1,205 @@
+saeb<-read.csv("amostra_202064835.csv")
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(e1071)
+# Gráfico de pizza da variável SEXO
+a <- saeb %>% 
+  group_by(SEXO) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(per=`n`/sum(`n`))
+a$label <- scales::percent(a$per)
+a$SEXO[a$SEXO == "A"] <- "Masculino"
+a$SEXO[a$SEXO == "B"] <- "Feminino"
+ggplot(data=a)+
+  geom_bar(aes(x="", y=per, fill=SEXO), stat="identity", width = 1)+
+  coord_polar("y", start=0)+ scale_colour_manual(values = c("steelblue", "cyan")) +
+  theme_void()+
+  geom_text(aes(x=1, y = cumsum(per) - per/2, label=label)) 
++ ggsave("sexo.jpg", width = 158, height = 93, units = "mm")
+
+#Gráfico de barras da Região
+a <- saeb %>% 
+  group_by(REGIAO) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(per=`n`/sum(`n`))
+a$label <- scales::percent(a$per)
+a$REGIAO<-as.character(a$REGIAO)
+a$REGIAO[a$REGIAO == "1"] <- "Norte"
+a$REGIAO[a$REGIAO == "2"] <- "Nordeste"
+a$REGIAO[a$REGIAO == "3"] <- "Sudeste"
+a$REGIAO[a$REGIAO == "4"] <- "Sul"
+a$REGIAO[a$REGIAO == "5"] <- "Centro-Oeste"
+
+
+legendas <- str_squish(str_c(a$n, " (", a$label, ")"))
+
+ggplot(a) + aes(x = REGIAO, y = n, label = legendas) +
+  geom_bar(stat="identity",fill="steelblue") + coord_flip() + scale_y_continuous(limits=c(0, 850)) +
+  geom_text(
+    position = position_dodge(width = 0.9),
+    vjust = -0.5, hjust = -0.1,
+    size = 3
+  ) + theme_light() +
+  labs(x = "Região", y = "Número de alunos") 
+ggsave("regiao.jpg", width = 210, height = 130, units = "mm")
+
+#Gráfico de barras da localização
+a <- saeb %>% 
+  group_by(LOCALIZACAO) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(per=`n`/sum(`n`))
+a$label <- scales::percent(a$per)
+a$LOCALIZACAO<-as.character(a$LOCALIZACAO)
+a$LOCALIZACAO[a$LOCALIZACAO == "1"] <- "Urbana"
+a$LOCALIZACAO[a$LOCALIZACAO == "2"] <- "Rural"
+legendas <- str_squish(str_c(a$n, " (", a$label, ")"))
+
+ggplot(a) + aes(x = LOCALIZACAO, y = n, label = legendas) +
+  geom_bar(stat="identity",fill="steelblue") +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, hjust = 0.5,
+    size = 3
+  ) + theme_light() +
+  labs(x = "Localização", y = "Número de alunos") 
+ggsave("localizacao.jpg", width = 158, height = 130, units = "mm")
+
+#Gráfico da variavel tempo de tela
+a <- saeb %>% 
+  group_by(USO_TEMPO_TELAS) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(per=`n`/sum(`n`))
+a$label <- scales::percent(a$per)
+a$USO_TEMPO_TELAS[a$USO_TEMPO_TELAS == "A"] <- "Menos de 1 hora"
+a$USO_TEMPO_TELAS[a$USO_TEMPO_TELAS == "B"] <- "Entre 1 e 2 horas"
+a$USO_TEMPO_TELAS[a$USO_TEMPO_TELAS == "C"] <- "Entre 2 e 3 horas"
+a$USO_TEMPO_TELAS[a$USO_TEMPO_TELAS == "D"] <- "Mais de 3 horas"
+a$USO_TEMPO_TELAS[a$USO_TEMPO_TELAS == "E"] <- "0 horas"
+a = a[-1,]
+
+a$USO_TEMPO_TELAS <- factor(a$ USO_TEMPO_TELAS, levels =
+                              c("0 horas", "Menos de 1 hora", "Entre 1 e 2 horas", "Entre 2 e 3 horas", "Mais de 3 horas"))
+
+legendas <- str_squish(str_c(a$n, " (", a$label, ")"))
+
+ggplot(a) + aes(x = USO_TEMPO_TELAS, y = n, label = legendas) +
+  geom_bar(stat="identity",fill="steelblue") +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, hjust = 0.5,
+    size = 3
+  ) + theme_light() +
+  labs(x = "Tempo gasto", 
+       y = "Número de alunos") 
+ggsave("tempotela.jpg", width = 158, height = 93, units = "mm")
+
+#Gráfico da variavel tempo de afazeres domésticos
+a <- saeb %>% 
+  group_by(AFAZERES_DOM) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(per=`n`/sum(`n`))
+a$label <- scales::percent(a$per)
+a$AFAZERES_DOM[a$AFAZERES_DOM == "A"] <- "Menos de 1 hora"
+a$AFAZERES_DOM[a$AFAZERES_DOM == "B"] <- "Entre 1 e 2 horas"
+a$AFAZERES_DOM[a$AFAZERES_DOM == "C"] <- "Entre 2 e 3 horas"
+a$AFAZERES_DOM[a$AFAZERES_DOM == "D"] <- "Mais de 3 horas"
+a$AFAZERES_DOM[a$AFAZERES_DOM == "E"] <- "0 horas"
+a = a[-1,]
+
+a$AFAZERES_DOM <- factor(a$AFAZERES_DOM, levels =
+                              c("0 horas", "Menos de 1 hora", "Entre 1 e 2 horas", "Entre 2 e 3 horas", "Mais de 3 horas"))
+
+legendas <- str_squish(str_c(a$n, " (", a$label, ")"))
+
+ggplot(a) + aes(x = AFAZERES_DOM, y = n, label = legendas) +
+  geom_bar(stat="identity",fill="steelblue") +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, hjust = 0.5,
+    size = 3
+  ) + theme_light() +
+  labs(x = "Tempo gasto", 
+       y = "Número de alunos") 
+  ggsave("tempodetarefas.jpg", width = 158, height = 93, units = "mm")
+  
+#NOTAS - PT
+summary(saeb$NOTA_LP)
+sd(saeb$NOTA_LP)
+pt<-saeb
+pt$NOTA_LP <- cut(pt$NOTA_LP,
+                     breaks = seq(92,339,19),
+                     labels = c('92 a 111','111 a 130',
+                     '130 a 149','149 a 168',
+                     '168 a 187','187 a 206',
+                     '206 a 225','225 a 244',
+                     '244 a 263','263 a 282',
+                     '282 a 301', '301 a 320',
+                     '320 a 339'))
+pt <- pt %>% 
+  group_by(NOTA_LP) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(per=`n`/sum(`n`))
+pt$perc <- scales::percent(pt$per)
+
+
+
+ggplot(saeb, aes(x = NOTA_LP)) +
+  geom_histogram( breaks = seq(92, 339, by = 19), fill="steelblue", color="black") + theme_light() +
+  labs(x = "Notas de português", 
+       y = "Número de alunos")
+ggsave("histpt.jpg", width = 158, height = 93, units = "mm")
+
+kurtosis(saeb$NOTA_LP)
+skewness(saeb$NOTA_LP)
+
+stem(saeb$NOTA_LP)
+
+ggplot(saeb, aes(x='', y=NOTA_LP)) + 
+  geom_boxplot(fill="steelblue", alpha=0.2) + 
+  labs(x = "Português", y = "Notas") + theme_light() + stat_summary(fun.y="mean", geom="point", shape=18, size=4, fill="#000999")
+ggsave("boxplotpt.jpg", width = 158, height = 158, units = "mm")
+
+#NOTAS - MT
+summary(saeb$NOTA_MT)
+sd(saeb$NOTA_MT)
+mt<-saeb
+mt$NOTA_MT <- cut(mt$NOTA_MT,
+                  breaks = seq(110,357,19),
+                  labels = c('110 a 129','129 a 148',
+                             '148 a 167','167 a 186',
+                             '186 a 205','205 a 224',
+                             '224 a 243','243 a 262',
+                             '262 a 281','281 a 300',
+                             '300 a 319', '319 a 338',
+                             '338 a 357'))
+mt <- mt %>% 
+  group_by(NOTA_MT) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(per=`n`/sum(`n`))
+mt$perc <- scales::percent(mt$per)
+
+
+
+ggplot(saeb, aes(x = NOTA_MT)) +
+  geom_histogram( breaks = seq(92, 339, by = 19), fill="steelblue", color="black") + theme_light() +
+  labs(x = "Notas de matemática", 
+       y = "Número de alunos")
+ggsave("histmt.jpg", width = 158, height = 93, units = "mm")
+
+kurtosis(saeb$NOTA_MT)
+skewness(saeb$NOTA_MT)
+sd(saeb$NOTA_MT)
+
+ggplot(saeb, aes(x='', y=NOTA_MT)) + 
+  geom_boxplot(fill="steelblue", alpha=0.2) + 
+  labs(x = "Matemática", y = "Notas") + theme_light() + stat_summary(fun.y="mean", geom="point", shape=18, size=4, fill="#000999")
+ggsave("boxplotmt.jpg", width = 158, height = 158, units = "mm")
+
