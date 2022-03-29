@@ -1,0 +1,47 @@
+#Importando amostra 202064835
+data <- read.csv("amostra_202064835.csv")
+# Pacotes
+library(statsr)
+library(tidyverse)
+library(goftest)
+library(nortest)
+install.packages("goftest")
+install.packages("nortest")
+## amostras
+set.seed(202064835)
+amostras_20 <- data %>% rep_sample_n(size = 20, reps = 50, replace = FALSE)
+set.seed(202064835)
+amostras_200 <- data %>% rep_sample_n(size = 200, reps = 50, replace = TRUE)
+# Amostra de tamanho 20
+## histograma
+
+ggplot(amostras_20, aes(x = NOTA_LP)) +
+  geom_histogram( breaks = seq(92, 339, by = 19), fill="steelblue", color="black") + theme_light() +
+  labs(x = "Notas de português", 
+       y = "Número de alunos")
+ggsave("histpt.jpg", width = 158, height = 93, units = "mm")
+
+## testes
+shapiro.test(amostras_20$NOTA_LP)
+lillie.test(amostras_20$NOTA_LP)
+ad.test(amostras_20$NOTA_LP)
+
+# Amostra de tamanho 200
+## histograma
+
+ggplot(amostras_200, aes(x = NOTA_LP)) +
+  geom_histogram( breaks = seq(92, 339, by = 19), fill="steelblue", color="black") + theme_light() +
+  labs(x = "Notas de português", 
+       y = "Número de alunos")
+ggsave("histpt200.jpg", width = 158, height = 93, units = "mm")
+
+## testes
+shapiro.test(amostras_200$NOTA_LP)
+lillie.test(amostras_200$NOTA_LP)
+ad.test(amostras_200$NOTA_LP)
+
+ggplot(data, aes(x = NOTA_LP)) +
+  geom_histogram( breaks = seq(92, 339, by = 19), fill="steelblue", color="black") + theme_light() +
+  labs(x = "Notas de português", 
+       y = "Número de alunos")
+ggsave("histptgeral.jpg", width = 158, height = 93, units = "mm")
